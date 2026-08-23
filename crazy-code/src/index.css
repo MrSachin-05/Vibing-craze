@@ -1,7 +1,2 @@
-body {
-  margin: 0;
-}
-
-#root {
-  min-height: 100vh;
-}
+body { min-width: 320px; }
+#root { min-height: 100vh; }

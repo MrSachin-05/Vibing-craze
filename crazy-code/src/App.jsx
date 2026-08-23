@@ -1,55 +1,66 @@
-import { useMemo, useRef, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Float, OrbitControls } from '@react-three/drei'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import './App.css'
 
-const projects = [
-  { title: 'Northstar', type: 'Web', year: '2024', description: 'A calm operating system for ambitious teams.', tags: ['Product design', 'React'], accent: 'coral' },
-  { title: 'Aperture', type: 'Brand', year: '2023', description: 'A visual identity for a new kind of camera studio.', tags: ['Art direction', 'Identity'], accent: 'lime' },
-  { title: 'Kindred', type: 'Web', year: '2023', description: 'Making meaningful introductions feel effortless.', tags: ['Strategy', 'Interface'], accent: 'blue' },
-  { title: 'Morrow', type: 'Experiments', year: '2022', description: 'An interactive study in light, space, and attention.', tags: ['Three.js', 'Motion'], accent: 'yellow' },
-]
-const skills = ['Product strategy', 'Creative direction', 'Design systems', 'React / TypeScript', 'Three.js', 'Motion design']
-const services = [
-  ['01', 'Web design', 'Modern, high-fidelity interfaces with a focus on premium aesthetics and intuitive experiences.'],
-  ['02', 'Web development', 'Fast, resilient websites with clean architecture and seamless functionality.'],
-  ['03', 'Mobile apps', 'Professional, native-feeling products designed for the way people actually use them.'],
-  ['04', 'Poetry', 'A creative playground for words, rhythm, and ideas outside the codebase.'],
-]
-const education = [
-  ['2010 - 2018', 'Saraswati Sishu Vidya Mandir', 'Elementary and primary education'],
-  ['2018 - 2020', 'S.T.N. Govt. High School', 'Junior secondary education'],
-  ['2020 - 2022', 'Dhenkanal Autonomous College', 'Higher secondary education'],
-  ['2022 - 2026', 'Centurion University', 'B.Tech in Computer Science and Engineering'],
+const titles = [
+  { name: 'The Wild Robot', kind: 'Movie', year: '2024', genre: 'Animation', score: '9.1', image: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=900&q=85' },
+  { name: 'Neon Ronin', kind: 'Anime', year: '2025', genre: 'Sci-fi', score: '8.8', image: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=900&q=85' },
+  { name: 'Perfect Days', kind: 'Movie', year: '2023', genre: 'Drama', score: '8.4', image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=85' },
+  { name: "Frieren: Beyond Journey's End", kind: 'Anime', year: '2023', genre: 'Fantasy', score: '9.3', image: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=900&q=85' },
+  { name: 'Spider-Verse', kind: 'Movie', year: '2023', genre: 'Action', score: '9.0', image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=900&q=85' },
+  { name: 'Blue Period', kind: 'Anime', year: '2021', genre: 'Drama', score: '8.1', image: 'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&w=900&q=85' },
 ]
 
-function OrbitalScene() {
-  const group = useRef(null)
-  useFrame(({ clock }) => { if (group.current) { group.current.rotation.y = clock.getElapsedTime() * 0.16; group.current.rotation.x = Math.sin(clock.getElapsedTime() * 0.4) * 0.08 } })
-  return <group ref={group}><mesh><icosahedronGeometry args={[1.25, 2]} /><meshStandardMaterial color="#e8ff72" wireframe transparent opacity={0.7} /></mesh><mesh rotation={[0.4, 0.2, 0]}><torusGeometry args={[1.75, 0.015, 8, 96]} /><meshBasicMaterial color="#ff674d" /></mesh><mesh rotation={[1.1, 0.3, 0.8]}><torusGeometry args={[2.05, 0.012, 8, 96]} /><meshBasicMaterial color="#79a9ff" /></mesh><mesh position={[0.9, 0.7, 0.6]}><sphereGeometry args={[0.12, 16, 16]} /><meshBasicMaterial color="#ff674d" /></mesh></group>
+const releases = [
+  ['06 SEP', 'The Bear', 'Series / season 04'],
+  ['14 SEP', 'One Piece', 'Anime / episode 1138'],
+  ['28 SEP', 'Megalopolis', 'Movie / theatrical'],
+]
+
+function Poster({ title, index, saved, onSave }) {
+  return <motion.article className="title-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06 }}>
+    <div className="poster" style={{ backgroundImage: `url(${title.image})` }}>
+      <span className="poster-kind">{title.kind}</span>
+      <button className={`save-button ${saved ? 'saved' : ''}`} onClick={onSave} aria-label={saved ? `Remove ${title.name} from watchlist` : `Add ${title.name} to watchlist`}>{saved ? '★' : '+'}</button>
+      <span className="poster-index">0{index + 1}</span>
+    </div>
+    <div className="title-details"><div><h3>{title.name}</h3><p>{title.genre} <span>/</span> {title.year}</p></div><strong>{title.score}</strong></div>
+  </motion.article>
 }
-function ParticleField() {
-  const points = useMemo(() => { const positions = new Float32Array(240); for (let index = 0; index < positions.length; index += 3) { positions[index] = Math.sin(index * 12.7) * 4.5; positions[index + 1] = Math.cos(index * 7.3) * 3.5; positions[index + 2] = Math.sin(index * 3.1) * 2 } return positions }, [])
-  return <points><bufferGeometry><bufferAttribute attach="attributes-position" count={points.length / 3} array={points} itemSize={3} /></bufferGeometry><pointsMaterial color="#79a9ff" size={0.025} transparent opacity={0.7} /></points>
+
+function VideoSculpture() {
+  return <div className="video-sculpture" aria-label="Animated abstract video sculpture">
+    <video autoPlay loop muted playsInline poster="/hero.png">
+      <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
+    </video>
+    <div className="sculpture-grid" />
+    <div className="sculpture-ring ring-one" />
+    <div className="sculpture-ring ring-two" />
+    <div className="sculpture-cube cube-one"><span /></div>
+    <div className="sculpture-cube cube-two"><span /></div>
+  </div>
 }
-function Scene() { return <Canvas camera={{ position: [0, 0, 6], fov: 48 }} dpr={[1, 1.5]}><ambientLight intensity={1.5} /><Float speed={1.5} rotationIntensity={0.25} floatIntensity={0.4}><OrbitalScene /></Float><ParticleField /><OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.4} /></Canvas> }
-function SectionHeading({ eyebrow, title, copy }) { return <div className="section-heading"><span className="eyebrow">{eyebrow}</span><h2>{title}</h2>{copy && <p>{copy}</p>}</div> }
 
 function App() {
-  const [filter, setFilter] = useState('All')
-  const [sent, setSent] = useState(false)
-  const visibleProjects = filter === 'All' ? projects : projects.filter((project) => project.type === filter)
+  const [activeKind, setActiveKind] = useState('All')
+  const [activeGenre, setActiveGenre] = useState('All genres')
+  const [watchlist, setWatchlist] = useState([])
+  const visibleTitles = titles.filter((title) => (activeKind === 'All' || title.kind === activeKind) && (activeGenre === 'All genres' || title.genre === activeGenre))
+  const toggleWatchlist = (name) => setWatchlist((items) => items.includes(name) ? items.filter((item) => item !== name) : [...items, name])
+
   return <main>
-    <nav className="nav"><a className="wordmark" href="#top">PORTFOLIO<span>.PRO</span></a><div className="nav-links"><a href="#work">Work</a><a href="#about">About</a><a href="#contact">Contact</a></div><a className="status" href="#contact"><i /> Available for work</a></nav>
-    <section className="hero-section" id="top"><div className="hero-copy"><span className="eyebrow">Independent designer + developer / 2024</span><h1>Ideas with<br /><em>dimension.</em></h1><p>I build expressive digital experiences for people shaping what comes next.</p><a className="arrow-link" href="#work">Explore selected work <span>↘</span></a></div><div className="scene-wrap"><Scene /><span className="scene-label">Interactive study / 001</span></div><div className="scroll-note">Scroll to wander <span>↓</span></div></section>
-    <section className="intro section-rule"><p className="big-statement">A small studio for <span>big shifts.</span><br />Strategy, identity, and digital<br />products with a pulse.</p><div className="intro-note">Based between the<br />practical and the possible.<br /><br /><span>01 - 04</span></div></section>
-    <section className="work-section content-section" id="work"><SectionHeading eyebrow="Selected work / 01" title="Things I have made" copy="A few recent collaborations and experiments. Each one starts with a question." /><div className="filters">{['All', 'Web', 'Brand', 'Experiments'].map((item) => <button className={filter === item ? 'active' : ''} key={item} onClick={() => setFilter(item)}>{item}</button>)}</div><div className="project-grid">{visibleProjects.map((project, index) => <motion.article className={`project-card ${project.accent}`} key={project.title} layout initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06 }}><div className="project-visual"><span>{String(index + 1).padStart(2, '0')}</span><div className="visual-shape" /></div><div className="project-meta"><div><h3>{project.title}</h3><p>{project.description}</p></div><span>{project.year}</span></div><div className="tag-row">{project.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></motion.article>)}</div></section>
-    <section className="about-section content-section section-rule" id="about"><div><SectionHeading eyebrow="A little about / 02" title="Useful, curious, human." /></div><div className="about-body"><p className="about-lead">I am Sachin, a multidisciplinary creative who likes working where clear thinking meets visual surprise.</p><p>Over the last 7 years, I have helped teams turn early, fuzzy ideas into products people want to spend time with. The best work usually lives somewhere between the brief and the beautiful accident.</p><div className="skills">{skills.map((skill, index) => <span key={skill}><b>0{index + 1}</b>{skill}</span>)}</div></div></section>
-    <section className="services-section content-section section-rule"><SectionHeading eyebrow="What I am doing / 03" title="Good work, in a few different shapes." /><div className="service-grid">{services.map(([number, title, description]) => <article className="service-item" key={title}><span>{number}</span><h3>{title}</h3><p>{description}</p></article>)}</div></section>
-    <section className="education-section content-section section-rule"><SectionHeading eyebrow="The long version / 04" title="Still learning, always." copy="A quick map of the places and people that shaped how I think and make." /><div className="education-list">{education.map(([years, school, degree]) => <div className="education-row" key={school}><span>{years}</span><div><h3>{school}</h3><p>{degree}</p></div><b>↗</b></div>)}</div></section>
-    <section className="contact-section content-section" id="contact"><div className="contact-copy"><SectionHeading eyebrow="Start a conversation / 05" title={<>Have a good<br /><em>question?</em></>} /><p>Tell me what you are working on, what feels stuck, or what you are curious about.</p><a href="mailto:hello@portfolio.pro" className="email-link">hello@portfolio.pro <span>↗</span></a></div><form onSubmit={(event) => { event.preventDefault(); setSent(true) }}><label>Name<input required type="text" placeholder="Your name" /></label><label>Email<input required type="email" placeholder="you@company.com" /></label><label>What is on your mind?<textarea required rows="4" placeholder="A few words is plenty..." /></label><button className="submit-button" type="submit">{sent ? 'Message ready to send' : 'Send an inquiry'} <span>↗</span></button></form></section>
-    <footer><a className="wordmark" href="#top">PORTFOLIO<span>.PRO</span></a><p>Made with intention, somewhere on Earth.</p><div className="socials"><a href="https://github.com" target="_blank" rel="noreferrer">GitHub ↗</a><a href="https://linkedin.com" target="_blank" rel="noreferrer">LinkedIn ↗</a><a href="#top">Back to top ↑</a></div></footer>
+    <header className="topbar"><a className="brand" href="#top">VIBING <span>CRAZY</span></a><nav><a href="#discover">Discover</a><a href="#calendar">Calendar</a><a href="#notes">Notes</a></nav><button className="watchlist-link" onClick={() => setActiveKind('All')}>Watchlist <b>{watchlist.length}</b></button></header>
+
+    <section className="hero" id="top"><div className="hero-copy"><p className="kicker"><span /> Issue 004 / 2026</p><h1>Stories that<br /><i>stay loud.</i></h1><p className="hero-intro">A hand-picked orbit of movies and anime for the beautifully obsessed.</p><a className="text-link" href="#discover">Enter the archive <span>↘</span></a></div><div className="feature-art"><VideoSculpture /><div className="feature-label"><span>Tonight's signal</span><h2>When the<br /><em>stars fall.</em></h2><p>Watch the sky change. Keep the weird parts.</p></div><span className="feature-code">VC / 04-26 / A1</span></div><div className="hero-ticker"><span>NOW PLAYING</span><b>◼</b><span>FILMS + ANIMATION + AFTERIMAGES</span><b>◼</b><span>NOW PLAYING</span></div></section>
+
+    <section className="discover" id="discover"><div className="section-head"><div><p className="kicker">01 / The signal</p><h2>Pick your<br /><i>frequency.</i></h2></div><p className="section-note">No rankings from a machine. Just things with a point of view, a pulse, and one scene you will think about tomorrow.</p></div><div className="controls"><div className="kind-tabs">{['All', 'Movie', 'Anime'].map((kind) => <button className={activeKind === kind ? 'active' : ''} key={kind} onClick={() => setActiveKind(kind)}>{kind}</button>)}</div><select value={activeGenre} onChange={(event) => setActiveGenre(event.target.value)} aria-label="Filter by genre"><option>All genres</option>{[...new Set(titles.map((title) => title.genre))].map((genre) => <option key={genre}>{genre}</option>)}</select></div><div className="title-grid">{visibleTitles.map((title, index) => <Poster key={title.name} title={title} index={index} saved={watchlist.includes(title.name)} onSave={() => toggleWatchlist(title.name)} />)}</div></section>
+
+    <section className="manifesto" id="notes"><div className="manifesto-orbit"><span>✳</span><b>WATCH<br />WIDER</b></div><div><p className="kicker">02 / Scene notes</p><p className="manifesto-copy">For the nights when a plot is not enough. We are here for the <em>color</em>, the silence, the impossible architecture, the one frame that breaks the whole story open.</p><a className="text-link" href="#calendar">See what is next <span>↘</span></a></div></section>
+
+    <section className="calendar" id="calendar"><div className="section-head"><div><p className="kicker">03 / Incoming</p><h2>Mark the<br /><i>dates.</i></h2></div><p className="section-note">Upcoming drops, fresh episodes, and reasons to cancel plans with confidence.</p></div><div className="release-list">{releases.map(([date, name, detail]) => <div className="release" key={name}><time>{date}</time><h3>{name}</h3><p>{detail}</p><span>↗</span></div>)}</div></section>
+
+    <footer><div><a className="brand" href="#top">VIBING <span>CRAZY</span></a><p>For curious eyes and late-night brains.</p></div><p className="footer-mark">Movies / Anime / Repeat</p><a className="text-link" href="#top">Back to top ↑</a></footer>
   </main>
 }
+
 export default App
