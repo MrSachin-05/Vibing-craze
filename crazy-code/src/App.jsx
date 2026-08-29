@@ -191,8 +191,19 @@ function App() {
         {/* ── manifesto ── */}
         <section className="manifesto" id="notes">
           <div className="manifesto-orbit">
-            <span>✳</span>
-            <b>WATCH<br />WIDER</b>
+            {/* topology-field: StructureFlowCollection variant="topology-field" hue=0 saturation=1 brightness=1 */}
+            <iframe
+              src="/topology-field.html"
+              title="Topology Field — rotating 3D node graph"
+              aria-hidden="true"
+              tabIndex={-1}
+              className="topology-iframe"
+              sandbox="allow-scripts"
+            />
+            <div className="orbit-label">
+              <span>✳</span>
+              <b>WATCH<br />WIDER</b>
+            </div>
           </div>
           <div>
             <p className="kicker">02 / Scene notes</p>

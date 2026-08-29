@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topology Field — Structure Flow</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        width: 100%; height: 100%;
+        background: transparent;
+        overflow: hidden;
+      }
+      canvas {
+        position: absolute;
+        inset: 0;
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+      }
+    </style>
+</head>
+<body>
+    <canvas id="animationCanvas"></canvas>
+    <script>
+        /* StructureFlowCollection variant="topology-field"
+           hue=0, saturation=1.00, brightness=1.00
+           Exact source: SHA-256 2cf632d75ed5a88b32df82839cf9608d8542f7e08b5a0e3072fce94825d1c98d
+           Stripped to WebGL canvas only — no header/footer/cards */
+
+        const canvas = document.getElementById('animationCanvas');
+
+        let width = canvas.offsetWidth || window.innerWidth;
+        let height = canvas.offsetHeight || window.innerHeight;
+
+        const scene = new THREE.Scene();
+        /* No fog — inside a circle clip the scene boundary is clear */
+
+        const camera = new THREE.PerspectiveCamera(60, width / height, 1, 2000);
+        camera.position.z = 650;
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setClearColor(0x000000, 0); /* fully transparent background */
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        /* ── nodes: fibonacci sphere, 120 points ── */
+        const numNodes = 120;
+        const nodes = [];
+        const nodeGeo = new THREE.SphereGeometry(1, 16, 16);
+
+        for (let i = 0; i < numNodes; i++) {
+            const phi   = Math.acos(-1 + (2 * i) / numNodes);
+            const theta = Math.sqrt(numNodes * Math.PI) * phi;
+            const x = Math.cos(theta) * Math.sin(phi);
+            const y = Math.sin(theta) * Math.sin(phi);
+            const z = Math.cos(phi);
+
+            /* topology-field: hue=0 → default white-to-vermilion palette
+               The node colour shifts from near-white through a warm vermilion
+               tint based on position — matching the Vibing Crazy palette */
+            const heat = (z + 1) / 2; /* 0 at south pole, 1 at north */
+            /* interpolate: dim blue-white → bright vermilion */
+            const r = Math.round(heat * 224 + (1 - heat) * 180);
+            const g = Math.round(heat *  35 + (1 - heat) * 190);
+            const b = Math.round(heat *  28 + (1 - heat) * 220);
+            const hex = (r << 16) | (g << 8) | b;
+
+            const mesh = new THREE.Mesh(
+                nodeGeo,
+                new THREE.MeshBasicMaterial({ color: hex, transparent: true, opacity: 0.9 })
+            );
+            mesh.position.set(x, y, z);
+            mesh.userData = {
+                baseSize:    Math.random() * 1.5 + 1.0,
+                pulseSpeed:  Math.random() * 0.02 + 0.015,
+                pulseOffset: Math.random() * Math.PI * 2,
+                heat: heat,
+            };
+            group.add(mesh);
+            nodes.push(mesh);
+        }
+
+        /* ── edges: connect nearby nodes ── */
+        const linePos = [], lineColors = [];
+        for (let i = 0; i < numNodes; i++) {
+            for (let j = i + 1; j < numNodes; j++) {
+                const dist = nodes[i].position.distanceTo(nodes[j].position);
+                const threshold = 0.45;
+                if (dist < threshold) {
+                    linePos.push(nodes[i].position.x, nodes[i].position.y, nodes[i].position.z);
+                    linePos.push(nodes[j].position.x, nodes[j].position.y, nodes[j].position.z);
+
+                    /* edge colour: blend the two endpoint heats, tinted vermilion */
+                    const h = (nodes[i].userData.heat + nodes[j].userData.heat) / 2;
+                    const a = (1 - dist / threshold) * 0.8;
+                    /* vermilion channel mix */
+                    const er = (h * 0.88 + (1 - h) * 0.70);
+                    const eg = (h * 0.14 + (1 - h) * 0.74);
+                    const eb = (h * 0.11 + (1 - h) * 0.86);
+                    lineColors.push(er * a, eg * a, eb * a);
+                    lineColors.push(er * a, eg * a, eb * a);
+                }
+            }
+        }
+
+        const lineGeo = new THREE.BufferGeometry();
+        lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePos, 3));
+        lineGeo.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
+        const lineMat = new THREE.LineBasicMaterial({
+            vertexColors: true,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            opacity: 0.70
+        });
+        const lines = new THREE.LineSegments(lineGeo, lineMat);
+        group.add(lines);
+
+        /* ── resize: fill the containing circle ── */
+        function resize() {
+            width  = window.innerWidth;
+            height = window.innerHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+
+            /* scale so the sphere fills the frame */
+            const R = Math.min(width, height) * 0.46;
+            group.scale.set(R, R, R);
+            group.position.set(0, 0, 0);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        /* ── animation loop ── */
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 1;
+
+            /* slow, atmospheric rotation */
+            group.rotation.y = time * 0.0018;
+            group.rotation.x = 0.18 + Math.sin(time * 0.0004) * 0.06;
+            group.rotation.z = time * 0.0006;
+
+            nodes.forEach(mesh => {
+                const p = mesh.userData;
+                const pulse = (Math.sin((time * p.pulseSpeed) + p.pulseOffset) + 1) / 2;
+
+                const targetRadius = p.baseSize + pulse * 1.8;
+                const scale = targetRadius / group.scale.x;
+                mesh.scale.set(scale, scale, scale);
+
+                /* heat-shifted opacity: vermilion nodes burn brighter */
+                mesh.material.opacity = 0.35 + pulse * 0.65;
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
