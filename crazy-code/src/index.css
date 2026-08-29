@@ -1,2 +1,4 @@
-body { min-width: 320px; }
-#root { min-height: 100vh; }
+/* Global resets — all visual styling lives in App.css */
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; padding: 0; }
+#root { background: transparent; }
