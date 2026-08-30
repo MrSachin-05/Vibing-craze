@@ -102,7 +102,7 @@ function EmberOverlay() {
         phase: r() * Math.PI * 2,
         life:  0,  // set below
         born:  0,
-        maxA:  0.28 + r() * 0.42,
+        maxA:  0.42 + r() * 0.48,   // boosted: must punch through vignette on screen blend
       }
     }
 
@@ -189,7 +189,7 @@ function EmberOverlay() {
       className="ember-canvas"
       aria-hidden="true"
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%',
-               pointerEvents: 'none', mixBlendMode: 'screen', zIndex: 1 }}
+               pointerEvents: 'none', mixBlendMode: 'screen', zIndex: 3 }}
     />
   )
 }
@@ -229,9 +229,10 @@ function App() {
           onLoad={() => setKageReady(true)}
           sandbox="allow-scripts allow-same-origin"
         />
-        <EmberOverlay />
         {/* vermilion vignette to blend iframe into content */}
         <div className="kage-vignette" />
+        {/* ember canvas: ABOVE vignette so screen-blend light punches through */}
+        <EmberOverlay />
       </div>
 
       {/* ── App overlay ── */}

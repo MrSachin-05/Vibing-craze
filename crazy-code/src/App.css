@@ -66,7 +66,7 @@ img { max-width: 100%; display: block; }
     linear-gradient(rgba(3,5,8,.58) 0%, transparent 18%, transparent 82%, rgba(3,5,8,.72) 100%);
 }
 
-/* ── canvas ember overlay — sits above iframe (z:1), below vignette (z:2) ── */
+/* ── canvas ember overlay — above vignette (z:2), below app-shell (z:10) ── */
 .ember-canvas {
   position: absolute;
   inset: 0;
@@ -74,7 +74,7 @@ img { max-width: 100%; display: block; }
   height: 100%;
   pointer-events: none;
   mix-blend-mode: screen;
-  z-index: 1;
+  z-index: 3;
   display: block;
 }
 
