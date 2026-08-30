@@ -241,6 +241,7 @@ function App() {
           <a className="brand" href="#top">VIBING <span>CRAZY</span></a>
           <nav>
             <a href="#discover">Discover</a>
+            <a href="#kage-showcase">Kage</a>
             <a href="#calendar">Calendar</a>
             <a href="#notes">Notes</a>
           </nav>
@@ -270,7 +271,73 @@ function App() {
           </div>
         </section>
 
-        {/* ── discover ── */}
+        {/* ── kage showcase ── */}
+        <section className="kage-showcase" id="kage-showcase">
+          <div className="kage-showcase-head">
+            <div>
+              <p className="kicker"><span />&#8197;00 / Featured Experience</p>
+              <h2 className="kage-showcase-title">
+                Enter the<br /><i>hidden realm.</i>
+              </h2>
+            </div>
+            <p className="kage-showcase-sub">
+              A five-chapter night walk through a Kyoto mountain temple.
+              Charred cypress, lantern light and a vermilion moon — rendered
+              live in WebGL. Scroll inside the gate.
+            </p>
+          </div>
+
+          {/* the full interactive kage.html experience */}
+          <div className="kage-window-wrap">
+            {/* outer glow ring */}
+            <div className="kage-window-ring" />
+            {/* interactive iframe — allow-pointer-events, full sandbox */}
+            <div className="kage-window">
+              <iframe
+                src="/kage.html"
+                title="Kage — Hidden Realms of Kyoto"
+                className="kage-window-iframe"
+                sandbox="allow-scripts allow-same-origin"
+                loading="lazy"
+              />
+              {/* top edge label */}
+              <div className="kage-window-bar">
+                <span className="kage-window-dot" />
+                <span className="kage-window-dot" />
+                <span className="kage-window-dot" />
+                <span className="kage-window-title">KAGE — WHERE STILLNESS REVEALS THE UNSEEN</span>
+                <a href="/kage.html" target="_blank" rel="noopener" className="kage-window-open">
+                  Open full ↗
+                </a>
+              </div>
+            </div>
+            {/* side annotation */}
+            <div className="kage-window-annot">
+              <span className="kage-annot-line" />
+              <span className="kage-annot-text">WebGL · Three.js · Live scene</span>
+              <span className="kage-annot-line" />
+            </div>
+          </div>
+
+          {/* chapter strip */}
+          <div className="kage-chapters">
+            {[
+              { n: '01', jp: '山門', en: 'The Sanmon', sub: 'Charred cypress gate' },
+              { n: '02', jp: '庭園', en: 'Still Gardens', sub: 'Lantern court' },
+              { n: '03', jp: '手業', en: 'Sacred Craft', sub: 'Yakisugi & borrowed scenery' },
+              { n: '04', jp: '残光', en: 'Afterlight', sub: 'Vermilion moon ritual' },
+            ].map(ch => (
+              <div key={ch.n} className="kage-ch">
+                <span className="kage-ch-n">{ch.n}</span>
+                <span className="kage-ch-jp">{ch.jp}</span>
+                <b className="kage-ch-en">{ch.en}</b>
+                <span className="kage-ch-sub">{ch.sub}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+
         <section className="discover" id="discover">
           <div className="section-head">
             <div>

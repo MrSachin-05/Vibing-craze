@@ -288,7 +288,258 @@ nav a:hover { color: var(--bone); }
   to   { transform: rotate(360deg); }
 }
 
-/* ================================================================ sections (glass cards) */
+/* ================================================================ kage showcase section */
+.kage-showcase {
+  position: relative;
+  padding: clamp(80px, 12vh, 140px) var(--pad) clamp(60px, 10vh, 120px);
+  overflow: hidden;
+}
+
+/* subtle frosted backdrop */
+.kage-showcase::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(5,7,10,.52);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: -1;
+  border-top: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+/* faint radial ember glow behind the window */
+.kage-showcase::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(ellipse 80% 70% at 50% 60%, rgba(224,35,28,.08) 0%, transparent 70%);
+}
+
+/* ── header row ── */
+.kage-showcase-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  margin-bottom: clamp(40px, 6vh, 72px);
+}
+
+.kage-showcase-title {
+  font-size: clamp(46px, 5.5vw, 84px);
+  font-weight: 400;
+  letter-spacing: -.04em;
+  line-height: .9;
+  margin: 0;
+}
+.kage-showcase-title i {
+  font-style: normal;
+  color: var(--vermilion);
+}
+
+.kage-showcase-sub {
+  font-size: clamp(13px, 1.1vw, 16px);
+  line-height: 1.7;
+  color: var(--bone-dim);
+  max-width: 320px;
+  margin-top: 52px;
+}
+
+/* ── browser-window wrapper ── */
+.kage-window-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 3vw, 48px);
+}
+
+/* ambient glow ring behind the window */
+.kage-window-ring {
+  position: absolute;
+  inset: -28px;
+  border-radius: 12px;
+  pointer-events: none;
+  background: transparent;
+  box-shadow:
+    0 0 0 1px rgba(224,35,28,.18),
+    0 0 60px -10px rgba(224,35,28,.22),
+    0 40px 120px -30px rgba(0,0,0,.9);
+  z-index: 0;
+}
+
+/* the browser-chrome window */
+.kage-window {
+  position: relative;
+  flex: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  outline: 1px solid rgba(223,231,224,.14);
+  outline-offset: -1px;
+  box-shadow:
+    0 30px 90px -20px rgba(0,0,0,.9),
+    0 0 0 1px rgba(224,35,28,.12);
+  transition: outline-color .5s, box-shadow .5s;
+  z-index: 1;
+}
+.kage-window:hover {
+  outline-color: rgba(223,231,224,.32);
+  box-shadow:
+    0 40px 120px -20px rgba(0,0,0,.95),
+    0 0 0 1px rgba(224,35,28,.28),
+    0 0 80px -20px rgba(224,35,28,.18);
+}
+
+/* browser top bar */
+.kage-window-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(8,10,14,.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(223,231,224,.08);
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 5;
+}
+.kage-window-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(224,35,28,.5);
+  flex-shrink: 0;
+}
+.kage-window-dot:nth-child(2) { background: rgba(201,162,74,.5); }
+.kage-window-dot:nth-child(3) { background: rgba(68,200,90,.5); }
+.kage-window-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-left: 8px;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kage-window-open {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+  flex-shrink: 0;
+  transition: color .3s;
+}
+.kage-window-open:hover { color: var(--vermilion); }
+
+/* the iframe itself — tall enough to show the scene */
+.kage-window-iframe {
+  display: block;
+  width: 100%;
+  height: min(82vh, 820px);
+  border: none;
+  margin-top: 34px;     /* offset for the bar */
+  pointer-events: auto; /* interactive! */
+}
+
+/* ── vertical annotation ── */
+.kage-window-annot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+.kage-annot-line {
+  display: block;
+  width: 1px;
+  height: 60px;
+  background: var(--glass-border);
+}
+.kage-annot-text {
+  writing-mode: vertical-rl;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── chapter strip ── */
+.kage-chapters {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--glass-border);
+  border: 1px solid var(--glass-border);
+  margin-top: clamp(32px, 5vh, 60px);
+}
+.kage-ch {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: clamp(18px, 2.5vw, 28px);
+  background: rgba(5,7,10,.78);
+  cursor: default;
+  transition: background .4s;
+  position: relative;
+  overflow: hidden;
+}
+.kage-ch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(224,35,28,.07), transparent 60%);
+  opacity: 0;
+  transition: opacity .4s;
+  pointer-events: none;
+}
+.kage-ch:hover { background: rgba(8,12,18,.88); }
+.kage-ch:hover::after { opacity: 1; }
+.kage-ch-n {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .2em;
+  color: var(--vermilion);
+}
+.kage-ch-jp {
+  font-family: 'Noto Serif JP', 'Onest', serif;
+  font-size: clamp(22px, 2.4vw, 36px);
+  color: var(--bone);
+  letter-spacing: .12em;
+  line-height: 1;
+}
+.kage-ch-en {
+  font-size: clamp(13px, 1.1vw, 16px);
+  font-weight: 500;
+  letter-spacing: .02em;
+  color: var(--bone-dim);
+}
+.kage-ch-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .kage-showcase-head { flex-direction: column; gap: 20px; }
+  .kage-showcase-sub { margin-top: 0; max-width: none; }
+  .kage-window-annot { display: none; }
+  .kage-chapters { grid-template-columns: repeat(2, 1fr); }
+  .kage-window-iframe { height: 60vh; }
+}
+@media (max-width: 560px) {
+  .kage-chapters { grid-template-columns: 1fr; }
+  .kage-window-iframe { height: 50vh; }
+}
+
+
 .discover, .calendar {
   padding: clamp(80px, 12vh, 160px) var(--pad);
   position: relative;
