@@ -59,36 +59,23 @@ img { max-width: 100%; display: block; }
 .kage-vignette {
   position: absolute;
   inset: 0;
+  z-index: 2;           /* above ember-canvas (z:1), below app-shell (z:10) */
   pointer-events: none;
   background:
     radial-gradient(ellipse 120% 90% at 50% 55%, transparent 25%, rgba(3,5,8,.55) 80%, rgba(3,5,8,.90) 100%),
     linear-gradient(rgba(3,5,8,.58) 0%, transparent 18%, transparent 82%, rgba(3,5,8,.72) 100%);
 }
 
-/* ── ember particles floating over the iframe ── */
-.ember-overlay {
+/* ── canvas ember overlay — sits above iframe (z:1), below vignette (z:2) ── */
+.ember-canvas {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  overflow: hidden;
-}
-.ember {
-  position: absolute;
-  bottom: 0;
-  left: var(--x, 50%);
-  width: var(--size, 3px);
-  height: var(--size, 3px);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,120,60,1) 20%, rgba(255,60,20,.5) 60%, transparent 100%);
-  animation: ember-rise var(--dur, 8s) var(--delay, 0s) ease-in infinite;
   mix-blend-mode: screen;
-  opacity: 0;
-}
-@keyframes ember-rise {
-  0%  { transform: translate(0, 0) scale(1);    opacity: 0; }
-  8%  { opacity: .95; }
-  60% { transform: translate(calc((var(--x) - 50%) * -.4), -55vh) scale(.7); opacity: .5; }
-  100%{ transform: translate(calc((var(--x) - 50%) * -.7), -100vh) scale(.3); opacity: 0; }
+  z-index: 1;
+  display: block;
 }
 
 /* ================================================================ app shell */
@@ -666,5 +653,7 @@ footer p {
 
 /* ================================================================ reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .ember, .badge-ring, .manifesto-orbit, .kage-frame { animation: none !important; transition: none !important; }
+  .badge-ring, .manifesto-orbit { animation: none !important; transition: none !important; }
+  .kage-frame { transition: none !important; }
+  .ember-canvas { display: none; }
 }

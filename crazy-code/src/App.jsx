@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import './App.css'
 
@@ -47,19 +47,150 @@ function Poster({ title, index, saved, onSave }) {
   )
 }
 
-/* Floating ember particles layered over the iframe */
+/* ── Seeded PRNG (mulberry32) so particles are deterministic on every render ── */
+function mulberry32(seed) {
+  let s = seed >>> 0
+  return function () {
+    s = (s + 0x6D2B79F5) | 0
+    let t = Math.imul(s ^ (s >>> 15), 1 | s)
+    t = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+/* ── Canvas-based ember particle overlay ── */
+const PALETTES = [
+  ['rgba(255,110,60,1)',   'rgba(224,60,20,0.55)',  'rgba(180,30,10,0)'],   // hot ember
+  ['rgba(255,170,80,1)',   'rgba(220,90,30,0.45)',  'rgba(160,40,10,0)'],   // copper spark
+  ['rgba(200,140,255,0.7)','rgba(140,80,200,0.25)', 'rgba(80,30,120,0)'],   // violet spirit (rare)
+]
+
 function EmberOverlay() {
+  const canvasRef = useRef(null)
+  const stateRef = useRef(null)  // { pool, raf, W, H }
+
+  const init = useCallback((canvas) => {
+    if (!canvas) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const ctx = canvas.getContext('2d')
+    const rand = mulberry32(0xCA3D7)
+    const COUNT = 55
+
+    let W = 0, H = 0
+    function resize() {
+      const rect = canvas.getBoundingClientRect()
+      W = canvas.width  = rect.width  || window.innerWidth
+      H = canvas.height = rect.height || window.innerHeight
+    }
+    resize()
+
+    // ResizeObserver keeps canvas pixel-perfect after any layout change
+    const ro = new ResizeObserver(() => resize())
+    ro.observe(canvas)
+
+    function makeParticle(born) {
+      const r = rand
+      const rval = r()
+      return {
+        x:     r() * W,
+        y:     born ? (H * (0.3 + r() * 0.7)) : (H + r() * 40),
+        rad:   0.6 + Math.pow(r(), 3) * 4.4,
+        pal:   rval < 0.78 ? 0 : rval < 0.96 ? 1 : 2,
+        vy:    -(0.08 + r() * 0.28),
+        amp:   8 + r() * 28,
+        freq:  0.00018 + r() * 0.00034,
+        phase: r() * Math.PI * 2,
+        life:  0,  // set below
+        born:  0,
+        maxA:  0.28 + r() * 0.42,
+      }
+    }
+
+    const pool = []
+    const now = performance.now()
+    for (let i = 0; i < COUNT; i++) {
+      const p = makeParticle(true)
+      p.life = (6000 + rand() * 12000) * (0.6 + p.rad * 0.12)
+      p.born = now - rand() * p.life * 0.9
+      pool.push(p)
+    }
+
+    let raf
+    function frame(t) {
+      ctx.clearRect(0, 0, W, H)
+      for (let i = 0; i < pool.length; i++) {
+        const p = pool[i]
+        const age = t - p.born
+        if (age > p.life || p.life === 0) {
+          const np = makeParticle(false)
+          np.life = (6000 + rand() * 12000) * (0.6 + np.rad * 0.12)
+          np.born = t
+          pool[i] = np
+          continue
+        }
+        const rel = age / p.life
+        let alpha
+        if (rel < 0.12)       alpha = (rel / 0.12) * p.maxA
+        else if (rel < 0.72)  alpha = p.maxA
+        else                  alpha = p.maxA * (1 - (rel - 0.72) / 0.28)
+
+        const x = p.x + Math.sin(t * p.freq + p.phase) * p.amp
+        const y = p.y + p.vy * age
+        if (y < -p.rad * 4) {
+          const np = makeParticle(false)
+          np.life = (6000 + rand() * 12000) * (0.6 + np.rad * 0.12)
+          np.born = t
+          pool[i] = np
+          continue
+        }
+        const pal = PALETTES[p.pal]
+        const R   = p.rad * (2.4 + Math.sin(t * 0.00073 + p.phase) * 0.4)
+        const g   = ctx.createRadialGradient(x, y, 0, x, y, R)
+        g.addColorStop(0,    pal[0])
+        g.addColorStop(0.38, pal[1])
+        g.addColorStop(1,    pal[2])
+        ctx.save()
+        ctx.globalAlpha = alpha
+        ctx.beginPath()
+        ctx.arc(x, y, R, 0, Math.PI * 2)
+        ctx.fillStyle = g
+        ctx.fill()
+        ctx.restore()
+      }
+      raf = requestAnimationFrame(frame)
+    }
+
+    const onVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(raf)
+      } else {
+        const t2 = performance.now()
+        pool.forEach(p => { p.born = t2 - rand() * p.life * 0.5 })
+        raf = requestAnimationFrame(frame)
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    raf = requestAnimationFrame(frame)
+    stateRef.current = { raf, pool, cleanup: () => {
+      cancelAnimationFrame(raf)
+      ro.disconnect()
+      document.removeEventListener('visibilitychange', onVisibility)
+    }}
+  }, [])
+
+  useEffect(() => {
+    init(canvasRef.current)
+    return () => stateRef.current?.cleanup()
+  }, [init])
+
   return (
-    <div className="ember-overlay" aria-hidden="true">
-      {Array.from({ length: 18 }, (_, i) => (
-        <span key={i} className="ember" style={{
-          '--x': `${Math.random() * 100}%`,
-          '--delay': `${Math.random() * 7}s`,
-          '--dur': `${5 + Math.random() * 8}s`,
-          '--size': `${2 + Math.random() * 3}px`,
-        }} />
-      ))}
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="ember-canvas"
+      aria-hidden="true"
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%',
+               pointerEvents: 'none', mixBlendMode: 'screen', zIndex: 1 }}
+    />
   )
 }
 
