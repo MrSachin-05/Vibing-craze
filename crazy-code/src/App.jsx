@@ -17,6 +17,34 @@ const releases = [
   ['28 SEP', 'Megalopolis', 'Movie / theatrical'],
 ]
 
+/* ── Kage chapter data ── */
+const kageCards = [
+  {
+    id: 'approach', title: 'Approach', jp: '参道', meta: 'The long climb', idx: '01 / 03',
+    image: '/secret-pathways-assets/generated/kage-approach.webp',
+    glow: { gx: '80.2%', gy: '23.9%', gr: '22%', gt: '6.1s', gt2: '9.7s', gc1: 'rgba(255,142,108,.50)', gc2: 'rgba(212,56,38,.24)' },
+  },
+  {
+    id: 'lanterns', title: 'Lanterns', jp: '灯籠', meta: 'Lantern court', idx: '02 / 03',
+    image: '/secret-pathways-assets/generated/kage-lantern-court.webp',
+    glow: { gx: '70.5%', gy: '47.2%', gr: '14%', gt: '3.7s', gt2: '5.3s', gc1: 'rgba(255,198,124,.62)', gc2: 'rgba(226,118,40,.30)' },
+    flame: true,
+  },
+  {
+    id: 'moonwater', title: 'Moonwater', jp: '月影', meta: 'The wet court', idx: '03 / 03',
+    image: '/secret-pathways-assets/generated/kage-moonwater.webp',
+    glow: { gx: '48.0%', gy: '16.8%', gr: '20%', gt: '7.3s', gt2: '11.2s', gc1: 'rgba(255,138,104,.52)', gc2: 'rgba(208,54,36,.24)' },
+  },
+]
+
+const kageLessons = [
+  { n: '01', title: 'The Hidden Gate', jp: '山門', desc: 'Why a gate is a sentence, and what you agree to when you walk under one.', time: '14 min' },
+  { n: '02', title: 'Borrowed Scenery', jp: '借景', desc: 'Shakkei: composing with a mountain you will never own.', time: '18 min' },
+  { n: '03', title: 'Charred Cypress', jp: '焼杉', desc: 'Yakisugi: burning a board black so the weather will let it live.', time: '21 min' },
+  { n: '04', title: 'Lantern Light', jp: '灯籠', desc: 'How a single ember decides the scale of everything around it.', time: '17 min' },
+  { n: '05', title: 'The Vermilion Moon', jp: '朱月', desc: 'Why the moon burns red over the valley, and what the garden does with it.', time: '22 min' },
+]
+
 function Poster({ title, index, saved, onSave }) {
   return (
     <motion.article
@@ -194,6 +222,248 @@ function EmberOverlay() {
   )
 }
 
+/* ── Scroll-reveal hook: fades + slides children in when they enter viewport ── */
+function useReveal(threshold = 0.15) {
+  const ref = useRef(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setVisible(true)
+      return
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); io.disconnect() } },
+      { threshold }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [threshold])
+
+  return [ref, visible]
+}
+
+/* ── Reveal wrapper component ── */
+function Rv({ children, as: Tag = 'div', className = '', delay = 0, variant = 'up', ...rest }) {
+  const [ref, visible] = useReveal()
+  const base = variant === 'fade'
+    ? { opacity: 0, transform: 'none' }
+    : { opacity: 0, transform: 'translate3d(0, 26px, 0)' }
+  const shown = { opacity: 1, transform: 'none' }
+  return (
+    <Tag
+      ref={ref}
+      className={className}
+      style={{
+        ...(visible ? shown : base),
+        transition: `opacity .9s cubic-bezier(.16,1,.3,1) ${delay}ms, transform 1.05s cubic-bezier(.16,1,.3,1) ${delay}ms`,
+        willChange: visible ? 'auto' : 'opacity, transform',
+      }}
+      {...rest}
+    >
+      {children}
+    </Tag>
+  )
+}
+
+/* ══════════════════════════════════════════════════════════
+   KAGE CHAPTER I — The Sanmon (The Gate)
+   ══════════════════════════════════════════════════════════ */
+function KageGate() {
+  return (
+    <section className="kg-sec kg-gate" id="kage-gate">
+      {/* foreground decoration */}
+      <div className="kg-fg" aria-hidden="true">
+        <span className="kg-fg-el kg-fg-wall">
+          <img src="/secret-pathways-assets/foreground/png/temple-wall.webp" alt="" width="1536" height="884" loading="lazy" decoding="async" />
+        </span>
+        <span className="kg-fg-el kg-fg-pine">
+          <img src="/secret-pathways-assets/foreground/png/pine-tree.webp" alt="" width="1024" height="1438" loading="lazy" decoding="async" />
+        </span>
+      </div>
+
+      <Rv className="kg-sec-head" variant="fade">
+        <span className="kg-k"><b>01</b> — The Sanmon</span>
+        <span className="kg-rule" />
+        <span className="kg-k kg-jp">山門</span>
+      </Rv>
+
+      <div className="kg-gate-grid">
+        <Rv as="h2" className="kg-display">
+          Charred cypress, worn stone, one gate left open.
+        </Rv>
+        <div className="kg-gate-copy">
+          <Rv as="p" className="kg-lead">
+            Kage begins where the city stops: a mountain gate of cedar burned black,
+            standing in its own weather. The soot is not decoration. It is how a board is taught to survive a
+            hundred rainy seasons, and the first thing this place asks you to understand.
+          </Rv>
+          <Rv as="p" className="kg-body" delay={80}>
+            Climb the worn steps and the worship hall lifts out of the mist, its paper
+            screens lit from inside like a lantern the size of a house. Above the eaves a vermilion moon holds
+            its place, patient, half hidden. Nothing here is in a hurry. Neither, for the next ninety minutes,
+            are you.
+          </Rv>
+          <Rv className="kg-arrowlink" variant="fade" delay={160}>
+            <a href="#kage-gardens">
+              <span>Cross the threshold</span>
+              <span className="kg-ar">
+                <svg viewBox="0 0 14 14" fill="none"><path d="M3 11 11 3M5 3h6v6" stroke="#dfe7e0" strokeWidth="1.3" /></svg>
+              </span>
+            </a>
+          </Rv>
+        </div>
+      </div>
+
+      <Rv className="kg-gate-stats">
+        <div><b>05</b><span>Chapters</span></div>
+        <div><b>92</b><span>Minutes</span></div>
+        <div><b>1611</b><span>Hall raised</span></div>
+        <div><b>∞</b><span>Stillness</span></div>
+      </Rv>
+    </section>
+  )
+}
+
+/* ══════════════════════════════════════════════════════════
+   KAGE CHAPTER II — Still Gardens
+   ══════════════════════════════════════════════════════════ */
+function KageGardens() {
+  return (
+    <section className="kg-sec kg-gardens" id="kage-gardens">
+      {/* foreground decoration */}
+      <div className="kg-fg" aria-hidden="true">
+        <span className="kg-fg-el kg-fg-sakura kg-fg-sway">
+          <img src="/secret-pathways-assets/foreground/png/sakura-branch.webp" alt="" width="1536" height="1024" loading="lazy" decoding="async" />
+        </span>
+        <span className="kg-fg-el kg-fg-bush">
+          <img src="/secret-pathways-assets/foreground/png/garden-bush.webp" alt="" width="1717" height="876" loading="lazy" decoding="async" />
+        </span>
+      </div>
+
+      <Rv className="kg-sec-head" variant="fade">
+        <span className="kg-k"><b>02</b> — Still Gardens</span>
+        <span className="kg-rule" />
+        <span className="kg-k kg-jp">庭園</span>
+      </Rv>
+
+      <div className="kg-cards">
+        {kageCards.map((card, i) => (
+          <Rv key={card.id} className="kg-card" delay={i * 100}>
+            <div
+              className="kg-card-fr"
+              style={{ backgroundImage: `linear-gradient(180deg, rgba(3,6,9,.04) 36%, rgba(3,6,9,.72) 100%), url(${card.image})` }}
+            >
+              <span className="kg-card-ar">
+                <svg viewBox="0 0 14 14" fill="none"><path d="M3 11 11 3M5 3h6v6" stroke="#dfe7e0" strokeWidth="1.3" /></svg>
+              </span>
+              <i
+                className={`kg-glow${card.flame ? ' kg-glow--flame' : ''}`}
+                style={{
+                  '--gx': card.glow.gx, '--gy': card.glow.gy, '--gr': card.glow.gr,
+                  '--gt': card.glow.gt, '--gt2': card.glow.gt2, '--gc1': card.glow.gc1, '--gc2': card.glow.gc2,
+                }}
+              />
+              <div className="kg-card-lab">
+                <b>{card.title}</b>
+                <span className="kg-jp">{card.jp}</span>
+              </div>
+            </div>
+            <div className="kg-card-meta">
+              <span>{card.meta}</span>
+              <span>{card.idx}</span>
+            </div>
+          </Rv>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+/* ══════════════════════════════════════════════════════════
+   KAGE CHAPTER III — Sacred Craft (Curriculum)
+   ══════════════════════════════════════════════════════════ */
+function KageCurriculum() {
+  return (
+    <section className="kg-sec kg-curriculum" id="kage-curriculum">
+      {/* foreground decoration */}
+      <div className="kg-fg" aria-hidden="true">
+        <span className="kg-fg-el kg-fg-stones">
+          <img src="/secret-pathways-assets/foreground/png/basalt-stones.webp" alt="" width="1536" height="996" loading="lazy" decoding="async" />
+        </span>
+        <span className="kg-fg-el kg-fg-grass">
+          <img src="/secret-pathways-assets/foreground/png/tall-grass.webp" alt="" width="1717" height="916" loading="lazy" decoding="async" />
+        </span>
+      </div>
+
+      <Rv className="kg-sec-head" variant="fade">
+        <span className="kg-k"><b>03</b> — Sacred Craft</span>
+        <span className="kg-rule" />
+        <span className="kg-k kg-jp">手業</span>
+      </Rv>
+
+      <div className="kg-cur-head">
+        <Rv as="h2" className="kg-display">
+          Five chapters. Ninety minutes. One quiet mind.
+        </Rv>
+        <Rv as="p" className="kg-body-lg" delay={80}>
+          Each chapter is a walk, not a lecture. You arrive at the gate, climb the
+          steps, sit with the lantern, and leave with one thing worth keeping.
+        </Rv>
+      </div>
+
+      <div className="kg-cur">
+        {kageLessons.map((les, i) => (
+          <Rv key={les.n} className="kg-les" delay={i * 60}>
+            <span className="kg-les-k">{les.n}</span>
+            <h3>{les.title}<em className="kg-jp">{les.jp}</em></h3>
+            <p>{les.desc}</p>
+            <span className="kg-les-t">{les.time}</span>
+            <i className="kg-les-bar" />
+          </Rv>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+/* ══════════════════════════════════════════════════════════
+   KAGE CHAPTER IV — Afterlight (Closing CTA)
+   ══════════════════════════════════════════════════════════ */
+function KageAfterlight() {
+  return (
+    <section className="kg-sec kg-afterlight" id="kage-afterlight">
+      {/* foreground decoration */}
+      <div className="kg-fg" aria-hidden="true">
+        <span className="kg-fg-el kg-fg-hill">
+          <img src="/secret-pathways-assets/foreground/png/hill.webp" alt="" width="1774" height="887" loading="lazy" decoding="async" />
+        </span>
+        <span className="kg-fg-el kg-fg-ruins">
+          <img src="/secret-pathways-assets/foreground/png/shrine-ruins.webp" alt="" width="1536" height="1001" loading="lazy" decoding="async" />
+        </span>
+      </div>
+
+      <Rv className="kg-eyebrow" variant="fade">Chapter 04 — Afterlight</Rv>
+      <Rv as="h2" className="kg-fin-title">Afterlight</Rv>
+      <Rv as="p" className="kg-body-lg kg-fin-body" delay={80}>
+        The gate does not close behind you. Take the walk whenever the noise
+        gets loud — it is always the same path, and never the same light.
+      </Rv>
+      <Rv variant="fade" delay={160}>
+        <a className="kg-cta" href="#top">
+          <i />
+          <span>Begin the walk</span>
+          <svg viewBox="0 0 14 14" fill="none" width="13" height="13">
+            <path d="M3 11 11 3M5 3h6v6" stroke="#dfe7e0" strokeWidth="1.3" />
+          </svg>
+        </a>
+      </Rv>
+    </section>
+  )
+}
+
 function App() {
   const [activeKind, setActiveKind] = useState('All')
   const [activeGenre, setActiveGenre] = useState('All genres')
@@ -242,6 +512,8 @@ function App() {
           <nav>
             <a href="#discover">Discover</a>
             <a href="#kage-showcase">Kage</a>
+            <a href="#kage-gate">Temples</a>
+            <a href="#kage-gardens">Gardens</a>
             <a href="#calendar">Calendar</a>
             <a href="#notes">Notes</a>
           </nav>
@@ -337,6 +609,11 @@ function App() {
           </div>
         </section>
 
+        {/* ── Kage chapter sections (ported from kage.html) ── */}
+        <KageGate />
+        <KageGardens />
+        <KageCurriculum />
+        <KageAfterlight />
 
         <section className="discover" id="discover">
           <div className="section-head">
