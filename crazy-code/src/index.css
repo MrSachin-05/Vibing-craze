@@ -1,4 +1,6 @@
-/* Global resets — all visual styling lives in App.css */
-*, *::before, *::after { box-sizing: border-box; }
-html, body, #root { height: 100%; margin: 0; padding: 0; }
-#root { background: transparent; }
+/* Scoped root resets — all global styling lives in kage.css */
+#root {
+  width: 100%;
+  height: auto;
+  background: transparent;
+}
